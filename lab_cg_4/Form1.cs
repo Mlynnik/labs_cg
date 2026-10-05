@@ -99,7 +99,7 @@ namespace lab_cg_4
             lblInfo = new Label
             {
                 Left = sx,
-                Top = 380,
+                Top = 500,
                 Width = 350,
                 Height = 200,
                 Text =
