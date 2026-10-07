@@ -17,18 +17,19 @@ namespace lab_cg_4.Geometry
 
         public PointF Center()
         {
-            if (pts.Count == 0)
-                return PointF.Empty;
+            if (pts.Count == 0) return PointF.Empty;
+            int n = pts.Count;
+            if (n > 2 && pts[0] == pts[n - 1])
+                n--;
 
             float sx = 0, sy = 0;
-
-            foreach (var p in pts)
+            for (int i = 0; i < n; i++)
             {
-                sx += p.X;
-                sy += p.Y;
+                sx += pts[i].X;
+                sy += pts[i].Y;
             }
 
-            return new PointF(sx / pts.Count, sy / pts.Count);
+            return new PointF(sx / n, sy / n);
         }
 
         public bool HitTest(PointF p, float tolerance)
