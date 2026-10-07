@@ -120,14 +120,22 @@ namespace lab_cg_4
 
         void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Alt)
+            if (e.KeyCode == Keys.Menu)
                 altDown = true;
         }
 
         void MainForm_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Alt)
+            if (e.KeyCode == Keys.Menu)
                 altDown = false;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Menu || keyData == (Keys.Alt | Keys.Menu))
+                return true;
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         void Canvas_MouseDoubleClick(object sender, MouseEventArgs e)
