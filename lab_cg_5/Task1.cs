@@ -126,15 +126,14 @@ namespace lab_cg_5
                 sb.Append(rules.ContainsKey(c) ? rules[c] : c.ToString());
             return sb.ToString();
         }
-        
+
         void DrawL(string commands)
         {
-            var pts = new List<PointF>();
+            var segs = new List<(PointF a, PointF b)>();
             double x = 0, y = 0, dir = startDir * Math.PI / 180;
             var stack = new Stack<double[]>();
+            var rnd = new Random();
             double step = 1;
-
-            pts.Add(new PointF(0, 0));
 
             foreach (char c in commands)
             {
@@ -144,9 +143,11 @@ namespace lab_cg_5
                     case 'G':
                         {
                             double d = dir + (chkRandom.Checked ? (rnd.NextDouble() - 0.5) * 0.35 : 0);
+                            var a = new PointF((float)x, (float)y);
                             x += step * Math.Cos(d);
                             y += step * Math.Sin(d);
-                            pts.Add(new PointF((float)x, (float)y));
+                            var b = new PointF((float)x, (float)y);
+                            segs.Add((a, b));
                         }
                         break;
                     case 'f':
@@ -171,24 +172,28 @@ namespace lab_cg_5
                 }
             }
 
-            RenderLines(pts);
+            RenderSegments(segs);
         }
 
-        void RenderLines(List<PointF> pts)
+        void RenderSegments(List<(PointF a, PointF b)> segs)
         {
-            if (pts.Count < 2) return;
+            if (segs.Count == 0) return;
             var bmp = new Bitmap(pic.Width, pic.Height);
             using (var g = Graphics.FromImage(bmp))
             {
                 g.Clear(Color.White);
                 g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                float minX = pts[0].X, maxX = pts[0].X, minY = pts[0].Y, maxY = pts[0].Y;
-                foreach (var p in pts)
+                float minX = segs[0].a.X, maxX = segs[0].a.X;
+                float minY = segs[0].a.Y, maxY = segs[0].a.Y;
+                foreach (var s in segs)
                 {
-                    if (p.X < minX) minX = p.X; if (p.X > maxX) maxX = p.X;
-                    if (p.Y < minY) minY = p.Y; if (p.Y > maxY) maxY = p.Y;
+                    if (s.a.X < minX) minX = s.a.X; if (s.a.X > maxX) maxX = s.a.X;
+                    if (s.a.Y < minY) minY = s.a.Y; if (s.a.Y > maxY) maxY = s.a.Y;
+                    if (s.b.X < minX) minX = s.b.X; if (s.b.X > maxX) maxX = s.b.X;
+                    if (s.b.Y < minY) minY = s.b.Y; if (s.b.Y > maxY) maxY = s.b.Y;
                 }
+
                 float w = Math.Max(maxX - minX, 0.001f);
                 float h = Math.Max(maxY - minY, 0.001f);
                 float margin = 20;
@@ -199,8 +204,8 @@ namespace lab_cg_5
                     margin + (p.X - minX) * scale,
                     margin + (p.Y - minY) * scale);
 
-                for (int i = 1; i < pts.Count; i++)
-                    g.DrawLine(Pens.Black, tr(pts[i - 1]), tr(pts[i]));
+                foreach (var s in segs)
+                    g.DrawLine(Pens.Black, tr(s.a), tr(s.b));
             }
             var old = pic.Image; pic.Image = bmp; old?.Dispose();
         }
