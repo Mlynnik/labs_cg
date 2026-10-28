@@ -9,6 +9,11 @@ namespace lab6.Model
         public int V;  
         public int N; 
         public int T; 
-        public FaceVertex(int v, int n = -1, int t = -1) { V = v; N = n; T = t; }
+        public FaceVertex(int v, int n = -1, int t = -1) 
+        { 
+            V = v; 
+            N = n; 
+            T = t; 
+        }
     }
 }
