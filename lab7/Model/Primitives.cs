@@ -17,17 +17,61 @@ namespace lab6.Model
                 for (int j = 0; j < 2; j++)
                     for (int k = 0; k < 2; k++)
                         p.Vertices.Add(new Vec3(2 * i - 1, 2 * j - 1, 2 * k - 1));
-                        int[,] F ={
-                        {0, 2, 3, 1}, 
-                        {4, 5, 7, 6}, 
-                        {0, 1, 5, 4}, 
-                        {2, 6, 7, 3}, 
-                        {0, 4, 6, 2}, 
-                        {1, 3, 7, 5}, 
-                    };
+
+            int[,] F ={
+                {0, 2, 3, 1},
+                {4, 5, 7, 6},
+                {0, 1, 5, 4},
+                {2, 6, 7, 3},
+                {0, 4, 6, 2},
+                {1, 3, 7, 5},
+            };
             for (int i = 0; i < 6; i++)
                 p.Faces.Add(new Face(new[] { F[i, 0], F[i, 1], F[i, 2], F[i, 3] }));
 
+            p.EnsureOutwardNormals();
+            return p;
+        }
+
+        public static Polyhedron Tetrahedron()
+        {
+            var p = new Polyhedron { Name = "Tetrahedron" };
+            p.Vertices.AddRange(new[]
+            {
+                new Vec3( 1,  1,  1),
+                new Vec3( 1, -1, -1),
+                new Vec3(-1,  1, -1),
+                new Vec3(-1, -1,  1),
+            });
+            int[,] F =
+            {
+                {0, 1, 2},
+                {0, 3, 1},
+                {0, 2, 3},
+                {1, 3, 2},
+            };
+            for (int i = 0; i < F.GetLength(0); i++)
+                p.Faces.Add(new Face(new[] { F[i, 0], F[i, 1], F[i, 2] }));
+            p.EnsureOutwardNormals();
+            return p;
+        }
+
+        public static Polyhedron Octahedron()
+        {
+            var p = new Polyhedron { Name = "Octahedron" };
+            p.Vertices.AddRange(new[]
+            {
+                new Vec3( 1,  0,  0), new Vec3(-1,  0,  0),
+                new Vec3( 0,  1,  0), new Vec3( 0, -1,  0),
+                new Vec3( 0,  0,  1), new Vec3( 0,  0, -1),
+            });
+            int[,] F =
+            {
+                {0, 2, 4}, {2, 1, 4}, {1, 3, 4}, {3, 0, 4},
+                {2, 0, 5}, {1, 2, 5}, {3, 1, 5}, {0, 3, 5},
+            };
+            for (int i = 0; i < F.GetLength(0); i++)
+                p.Faces.Add(new Face(new[] { F[i, 0], F[i, 1], F[i, 2] }));
             p.EnsureOutwardNormals();
             return p;
         }

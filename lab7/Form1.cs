@@ -14,7 +14,6 @@ namespace lab6
         readonly Dictionary<string, Polyhedron> _loadedModels = new();
         bool _suppressComboEvent = false;
 
-        // ----- Контролы -----
         ComboBox _modelCombo;
         RadioButton _perspRadio, _axonRadio;
         TextBox _txBox, _tyBox, _tzBox;
@@ -45,7 +44,6 @@ namespace lab6
             Load += (_, __) => Redraw();
         }
 
-        // ================== UI ==================
         void BuildUI()
         {
             var split = new SplitContainer
@@ -68,9 +66,12 @@ namespace lab6
             leftScroll.Controls.Add(stack);
             split.Panel1.Controls.Add(leftScroll);
 
-            // ---------- Модель ----------
             _modelCombo = new ComboBox { Width = 400, DropDownStyle = ComboBoxStyle.DropDownList };
-            _modelCombo.Items.AddRange(new object[] { "Икосаэдр", "Додекаэдр", "Куб" });
+            _modelCombo.Items.AddRange(new object[]
+            {
+                "Икосаэдр", "Додекаэдр", "Куб",
+                "Тетраэдр", "Гексаэдр", "Октаэдр"
+            });
             _modelCombo.SelectedIndex = 0;
             _modelCombo.SelectedIndexChanged += OnModelChanged;
 
@@ -81,19 +82,16 @@ namespace lab6
                 MakeButton("Сохранить в файл…", OnSaveFile)));
             AddGroup(stack, "Модель", modelPanel);
 
-            // ---------- Проекция ----------
             _perspRadio = new RadioButton { Text = "Перспективная", Checked = true, AutoSize = true };
             _axonRadio = new RadioButton { Text = "Аксонометрическая", AutoSize = true };
             _perspRadio.CheckedChanged += OnProjectionChanged;
             _axonRadio.CheckedChanged += OnProjectionChanged;
             AddGroup(stack, "Проекция", Row(_perspRadio, _axonRadio));
 
-            // ---------- Смещение ----------
             _txBox = NumBox("0.5"); _tyBox = NumBox("0"); _tzBox = NumBox("0");
             AddGroup(stack, "Смещение (dx, dy, dz)",
                 Row(_txBox, _tyBox, _tzBox, MakeButton("Сдвинуть", OnTranslate)));
 
-            // ---------- Поворот вокруг координатной оси ----------
             _rotAngleBox = NumBox("15");
             AddGroup(stack, "Поворот вокруг оси (град)",
                 Row(_rotAngleBox,
@@ -101,20 +99,17 @@ namespace lab6
                     MakeButton("Y", OnRotY),
                     MakeButton("Z", OnRotZ)));
 
-            // ---------- Масштаб ----------
             _scaleBox = NumBox("1.2");
             AddGroup(stack, "Масштаб",
                 Row(_scaleBox,
                     MakeButton("Относительно 0", OnScale),
                     MakeButton("Относительно центра", OnScaleCenter)));
 
-            // ---------- Отражение ----------
             AddGroup(stack, "Отражение относительно плоскости",
                 Row(MakeButton("XY", OnReflectXY),
                     MakeButton("XZ", OnReflectXZ),
                     MakeButton("YZ", OnReflectYZ)));
 
-            // ---------- Поворот вокруг оси через центр ----------
             _axisAngleBox = NumBox("30");
             _axisCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
             _axisCombo.Items.AddRange(new object[] { "X", "Y", "Z" });
@@ -123,7 +118,6 @@ namespace lab6
                 Row(_axisAngleBox, _axisCombo,
                     MakeButton("Повернуть", OnRotAroundCenterAxis)));
 
-            // ---------- Поворот вокруг произвольной прямой ----------
             _l1xBox = NumBox("0"); _l1yBox = NumBox("0"); _l1zBox = NumBox("0");
             _l2xBox = NumBox("1"); _l2yBox = NumBox("1"); _l2zBox = NumBox("1");
             _lineAngleBox = NumBox("30");
@@ -141,7 +135,6 @@ namespace lab6
                 MakeButton("Повернуть вокруг A→B", OnRotAroundLine)));
             AddGroup(stack, "Поворот вокруг произвольной прямой", linePanel);
 
-            // ---------- Фигура вращения ----------
             _generatrixBox = new TextBox
             {
                 Multiline = true,
@@ -170,7 +163,6 @@ namespace lab6
             revPanel.Controls.Add(MakeButton("Построить фигуру вращения", OnBuildRevolution));
             AddGroup(stack, "Фигура вращения", revPanel);
 
-            // ---------- График двух переменных ----------
             _functionCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
             _functionCombo.Items.AddRange(new object[]
             {
@@ -203,10 +195,8 @@ namespace lab6
             surfPanel.Controls.Add(MakeButton("Построить график", OnBuildSurface));
             AddGroup(stack, "График двух переменных (z = f(x, y))", surfPanel);
 
-            // ---------- Сброс ----------
             stack.Controls.Add(MakeButton("Сбросить все преобразования", OnReset));
 
-            // ---------- Правая панель — изображение ----------
             _pictureBox = new PictureBox
             {
                 Dock = DockStyle.Fill,
@@ -220,7 +210,6 @@ namespace lab6
             split.Panel1MinSize = 440;
         }
 
-        // ---- Вспомогательные билдеры ----
         TextBox NumBox(string text) => new TextBox { Text = text, Width = 60 };
 
         Button MakeButton(string text, EventHandler click)
@@ -252,7 +241,6 @@ namespace lab6
             parent.Controls.Add(gb);
         }
 
-        // ================== Логика ==================
         void SetModel(Polyhedron newModel, bool center, bool registerInCombo = true)
         {
             _model = newModel;
@@ -272,7 +260,6 @@ namespace lab6
             _initialMatrix = center ? Mat4.Translation(-newModel.Center) : Mat4.Identity;
             _modelMatrix = _initialMatrix;
 
-            // ★ ФИКСИРУЕМ радиус один раз на модель — он не зависит от преобразований
             _sceneRadius = ComputeRadius(_model, _initialMatrix);
 
             Redraw();
@@ -296,7 +283,7 @@ namespace lab6
 
             _renderer.Projection = _perspRadio.Checked ? ProjectionMode.Perspective
                                                  : ProjectionMode.Axonometric;
-            _renderer.SceneRadius = _sceneRadius;   // ★ фиксированный, а не от _modelMatrix
+            _renderer.SceneRadius = _sceneRadius;   
 
             _renderer.Clear(unchecked((int)0xFFF2F2F2));
             _renderer.Render(_model, _modelMatrix);
@@ -316,13 +303,18 @@ namespace lab6
                 SetModel(Primitives.Dodecahedron(), false, registerInCombo: false);
             else if (name == "Куб")
                 SetModel(Primitives.Cube(), false, registerInCombo: false);
+            else if (name == "Тетраэдр")
+                SetModel(Primitives.Tetrahedron(), false, registerInCombo: false);
+            else if (name == "Гексаэдр")
+                SetModel(Primitives.Cube(), false, registerInCombo: false);
+            else if (name == "Октаэдр")
+                SetModel(Primitives.Octahedron(), false, registerInCombo: false);
             else if (_loadedModels.TryGetValue(name, out var m))
                 SetModel(m, true);
         }
 
         void OnProjectionChanged(object s, EventArgs e) { if (IsHandleCreated) Redraw(); }
 
-        // ---------- Парсинг ----------
         double D(TextBox b)
         {
             var s = b.Text.Replace(',', '.').Trim();
@@ -341,7 +333,6 @@ namespace lab6
 
         double Rad(double deg) => deg * Math.PI / 180.0;
 
-        // ---------- Файлы ----------
         void OnLoadFile(object s, EventArgs e)
         {
             using var dlg = new OpenFileDialog
@@ -372,7 +363,6 @@ namespace lab6
             catch (Exception ex) { MessageBox.Show(this, "Ошибка сохранения: " + ex.Message); }
         }
 
-        // ---------- Аффинные преобразования ----------
 
         static double ComputeRadius(Polyhedron m, Mat4 mat)
         {
@@ -426,7 +416,6 @@ namespace lab6
             var axis = _axisCombo.SelectedIndex == 0 ? Vec3.UnitX
                      : _axisCombo.SelectedIndex == 1 ? Vec3.UnitY
                      : Vec3.UnitZ;
-            // ВАЖНО: мировой центр (а не локальный)
             var worldCenter = _modelMatrix.TransformPoint(_model.Center);
             _modelMatrix = Mat4.RotateAroundAxisThroughPoint(worldCenter, axis, Rad(D(_axisAngleBox)))
                          * _modelMatrix;
@@ -448,7 +437,6 @@ namespace lab6
 
         void OnReset(object s, EventArgs e) { _modelMatrix = _initialMatrix; Redraw(); }
 
-        // ---------- Построение фигуры вращения ----------
         void OnBuildRevolution(object s, EventArgs e)
         {
             try
@@ -477,8 +465,6 @@ namespace lab6
             }
             catch (Exception ex) { MessageBox.Show(this, "Ошибка построения: " + ex.Message); }
         }
-
-        // ---------- Построение графика ----------
         void OnBuildSurface(object s, EventArgs e)
         {
             try
