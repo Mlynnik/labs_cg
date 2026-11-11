@@ -1,7 +1,6 @@
 using lab6.Math3d;
 using lab6.Model;
 using lab6.Rendering;
-using lab6.Rendering;
 
 namespace lab6
 {
@@ -59,7 +58,7 @@ namespace lab6
 
         public Form1()
         {
-            Text = "Lab8 — отсечение, Z-буфер, камера";
+            Text = "Lab9 — освещение и текстурирование";
             Width = 1400; Height = 1000;
             StartPosition = FormStartPosition.CenterScreen;
 
@@ -269,7 +268,14 @@ namespace lab6
             AddGroup(stack, "Камера", camHost);
             BuildCameraUI(camHost);                // ← P3 реализует тело
 
-
+            var lab9Host = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                WrapContents = false
+            };
+            AddGroup(stack, "ЛР9: освещение и текстуры", lab9Host);
+            BuildLab9UI(lab9Host);
 
             _txBox = NumBox("0.5"); _tyBox = NumBox("0"); _tzBox = NumBox("0");
             AddGroup(stack, "Смещение (dx, dy, dz)",
@@ -474,6 +480,7 @@ namespace lab6
             bool rotate = _rotateObjCheck?.Checked ?? false;
             _renderer.SceneTransform = rotate ? Mat4.RotationY(_animationAngle) : Mat4.Identity;
 
+            ConfigureLab9Renderer();
             _renderer.Clear(_renderer.BackgroundColor);
             _renderer.RenderScene(_scene);
             _renderer.Present();
@@ -616,8 +623,6 @@ namespace lab6
             catch (Exception ex) { MessageBox.Show(this, "Ошибка сохранения: " + ex.Message); }
         }
 
-        // Постройка фигуры вращения / поверхности — те же, что в ЛР7,
-        // только в конце вместо SetModel(...) вызывают AddModel(m, color).
         void OnBuildRevolution(object s, EventArgs e)
         {
             try
@@ -654,8 +659,6 @@ namespace lab6
             }
             catch (Exception ex) { MessageBox.Show(this, "Ошибка: " + ex.Message); }
         }
-
-
 
         static Func<double, double, double> GetSelectedFunction(int idx) => idx switch
         {
